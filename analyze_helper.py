@@ -1,17 +1,54 @@
 import sys, os, time, datetime
 import collections
 
+class UserInfo(object):
+    def __init__(self):
+        self.cnt_client = 0
+        self.cnt_web = 0
+        self.users = set()
+    def add_user(self, uId):
+        self.users.add(uId)
+        if uId.lower().endswith(".w"):
+            self.cnt_web += 1
+        else:
+            self.cnt_client += 1
+    def get_clientusercnt(self):
+        return  self.cnt_client
+    def get_webusercnt(self):
+        return  self.cnt_web
+    def get_usercnt(self):
+        return self.cnt_web + self.cnt_client
+    def get_users(self):
+        return self.users
+
 class ClientUserInfo(object):
-	def __init__(self):
-		self.cnt_used = 0
-		self.tbs = set()
-		self.apps = set()
+    def __init__(self):
+        self.cnt_used = 0
+        self.tbs = set()
+        self.apps = set()
+    def getCntUsed(self):
+        return self.cnt_used
+
+    def getCntTb(self):
+        return len(self.tbs)
+
+    def getCntApp(self):
+        return len(self.apps)
 
 class AppUserInfo(object):
-	def __init__(self):
-		self.cnt_used = 0
-		self.users = set()
-		self.cnt_pv = 0
+    def __init__(self):
+        self.cnt_used = 0
+        self.users = set()
+        self.cnt_pv = 0
+
+    def getCntUsed(self):
+        return self.cnt_used
+
+    def getCntUser(self):
+        return len(self.users)
+
+    def getCntPV(self):
+        return self.cnt_pv
 
 class TableRecord(object):
     def __init__(self, vv_id):
@@ -40,8 +77,9 @@ class TableRecord(object):
             if (len(vv_usr) > 0):
                 self.usr_id.add(vv_usr)
 
+
 class AnalyzeHelper(object):
-    arr_self_ip = ["113.106.106.3","113.106.106.26","113.106.106.29"]
+    arr_self_ip = ["113.106.106.3", "113.106.106.26", "113.106.106.29"]
     ignore_path = ['/logout', '/usr', '/oauth2']
 
     def __init__(self, date):
@@ -68,7 +106,8 @@ class AnalyzeHelper(object):
                 arr = rr.decode('utf-8').split('\t')
                 if arr[self.idx_apf_addr].endswith(('.C')) is False:
                     continue
-                if arr[self.idx_ip].startswith(tuple(self.arr_self_ip)) or arr[self.idx_ip].endswith(tuple(self.arr_self_ip)):
+                if arr[self.idx_ip].startswith(tuple(self.arr_self_ip)) or arr[self.idx_ip].endswith(
+                        tuple(self.arr_self_ip)):
                     continue
                 if arr[self.idx_path].startswith(tuple(self.ignore_path)):
                     continue
@@ -102,7 +141,8 @@ class AnalyzeHelper(object):
                 arr = rr.decode('utf-8').split('\t')
                 if arr[self.idx_apf_addr].endswith(('.C')):
                     continue
-                if arr[self.idx_ip].startswith(tuple(self.arr_self_ip)) or arr[self.idx_ip].endswith(tuple(self.arr_self_ip)):
+                if arr[self.idx_ip].startswith(tuple(self.arr_self_ip)) or arr[self.idx_ip].endswith(
+                        tuple(self.arr_self_ip)):
                     continue
                 app_id = arr[self.idx_app_id]
                 if len(app_id) == 0:
@@ -151,10 +191,67 @@ class AnalyzeHelper(object):
             for rr in ff.readlines():
                 arr = rr.decode('utf-8').split("\t")
                 up = (arr[self.idx_user], arr[self.idx_apf_addr])
-                if (arr[self.idx_ip].startswith(tuple(self.arr_self_ip)) or arr[self.idx_ip].endswith(tuple(self.arr_self_ip))):
+                if (arr[self.idx_ip].startswith(tuple(self.arr_self_ip)) or arr[self.idx_ip].endswith(
+                        tuple(self.arr_self_ip))):
                     continue
-                if (len(up[1])==0):
+                if (len(up[1]) == 0):
                     continue
                 up_coll[up] = up_coll[up] + 1
                 if (len(up[0]) != 0):
                     peer_map[up[1]].add(up[0])
+
+def dateFmt(arg):
+    fmts = ['%Y/%m/%d', '%Y-%m-%d', '%Y%m%d']
+    for fmt in fmts:
+        try:
+            datetime.datetime.strptime(arg, fmt)
+            return fmt
+        except:
+            continue
+    return ''
+
+def getUsrColl(up_coll, peer_map, usr_coll):
+    for uu in up_coll:
+        if (len(uu[0]) != 0):
+            usr_coll[uu[0]] += up_coll[uu]
+        elif(len(peer_map[uu[1]]) > 0):
+            usr_coll[list(peer_map[uu[1]])[0]] += up_coll[uu]
+        else:
+            usr_coll[uu[1]] += up_coll[uu]
+
+def outputTbAnalyzeRes(fileName, tal_coll):
+    with open(fileName, "w") as ff:
+        ff.write("table_id\tvisit_count\tuser_count\tpeer_c_count\tpeer_w_count\tis_create\t")
+        ff.write("ip\tusr_id\n")
+        for tbl_item in tal_coll.values():
+            ff.write(
+                "%s\t%d\t%d\t%d\t%d\t"%
+                (tbl_item.id,
+                tbl_item.cnt_visit,
+                len(tbl_item.set_usr),
+                len(tbl_item.set_peer_c),
+                len(tbl_item.set_peer_w)))
+
+            ff.write(str(tbl_item.is_new)+"\t")
+            ff.write(";".join(tbl_item.ip)+"\t")
+            ff.write(";".join(tbl_item.usr_id)+"\n")
+
+def outputUpAnalyzeRes(fileName, up_coll):
+    with open(fileName, "w") as ff:
+        ff.write("usr_id\tcount\n")
+        for uu in up_coll:
+            ff.write("%s\t%d\n"%(uu, up_coll[uu]))
+
+def outputClientUsrInfoRes(fileName, clientUsrInfos):
+    with open(fileName, "w") as ff:
+        ff.write("apf_addr\tcnt_used\tcnt_tb\tcnt_app\n")
+        for usr in clientUsrInfos:
+            ff.write("%s\t%d\t%d\t%d\n"%(usr, clientUsrInfos[usr].getCntUsed(),\
+                                         clientUsrInfos[usr].getCntTb(), clientUsrInfos[usr].getCntApp()))
+
+def outputAppUsrInfoRes(fileName, appUsrInfos):
+    with open(fileName, "w") as ff:
+        ff.write("app_id\tcnt_used\tcnt_usr\tcnt_pv\n")
+        for app in appUsrInfos:
+            ff.write("%s\t%d\t%d\t%d\n"%(app, appUsrInfos[app].getCntUsed(),\
+                                         appUsrInfos[app].getCntUser(), appUsrInfos[app].getCntPV()))
