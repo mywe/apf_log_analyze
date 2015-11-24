@@ -97,11 +97,6 @@ class AnalyzeHelper(object):
     def getClientUserInfo(self, clientUInfos):
         with open(self.str_file, "rb") as ff:
             arr_field = ff.readline().decode('utf-8').split('\t')
-            self.idx_apf_addr = arr_field.index("apf_addr")
-            self.idx_table_id = arr_field.index("table_id")
-            self.idx_app_id = arr_field.index("app_id")
-            self.idx_path = arr_field.index("path")
-            self.idx_ip = arr_field.index("ip")
             for rr in ff.readlines():
                 arr = rr.decode('utf-8').split('\t')
                 if arr[self.idx_apf_addr].endswith(('.C')) is False:
@@ -109,8 +104,8 @@ class AnalyzeHelper(object):
                 if arr[self.idx_ip].startswith(tuple(self.arr_self_ip)) or arr[self.idx_ip].endswith(
                         tuple(self.arr_self_ip)):
                     continue
-                if arr[self.idx_path].startswith(tuple(self.ignore_path)):
-                    continue
+#                if arr[self.idx_path].startswith(tuple(self.ignore_path)):
+#                    continue
                 cid = arr[self.idx_apf_addr]
                 clientUInfo = None
                 if cid in clientUInfos:
@@ -132,11 +127,6 @@ class AnalyzeHelper(object):
     def getAppUserInfo(self, appUInfos):
         with open(self.str_file, "rb") as ff:
             arr_field = ff.readline().decode('utf-8').split('\t')
-            self.idx_apf_addr = arr_field.index("apf_addr")
-            self.idx_table_id = arr_field.index("table_id")
-            self.idx_app_id = arr_field.index("app_id")
-            self.idx_path = arr_field.index("path")
-            self.idx_ip = arr_field.index("ip")
             for rr in ff.readlines():
                 arr = rr.decode('utf-8').split('\t')
                 if arr[self.idx_apf_addr].endswith(('.C')):
@@ -172,7 +162,7 @@ class AnalyzeHelper(object):
                 arr = rr.decode('utf-8').split("\t")
                 vv_table = arr[self.idx_table_id]
                 vv_path = arr[self.idx_path]
-                vv_usr = arr[self.idx_usr]
+                vv_usr = arr[self.idx_user]
                 vv_peer = arr[self.idx_apf_addr]
                 vv_usr_own = arr[self.idx_usr_own]
                 vv_ip = arr[self.idx_ip]
