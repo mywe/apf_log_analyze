@@ -84,17 +84,22 @@ class AnalyzeHelper(object):
 
     def __init__(self, date):
         self.str_file = str(date)
-        with open(self.str_file, "rb") as ff:
-            arr_field = ff.readline().decode('utf-8').split('\t')
-            self.idx_apf_addr = arr_field.index("apf_addr")
-            self.idx_table_id = arr_field.index("table_id")
-            self.idx_app_id = arr_field.index("app_id")
-            self.idx_path = arr_field.index("path")
-            self.idx_ip = arr_field.index("ip")
-            self.idx_user = arr_field.index("usr_id")
-            self.idx_usr_own = arr_field.index("usr_own_table")
+        try:
+            with open(self.str_file, "rb") as ff:
+                arr_field = ff.readline().decode('utf-8').split('\t')
+                self.idx_apf_addr = arr_field.index("apf_addr")
+                self.idx_table_id = arr_field.index("table_id")
+                self.idx_app_id = arr_field.index("app_id")
+                self.idx_path = arr_field.index("path")
+                self.idx_ip = arr_field.index("ip")
+                self.idx_user = arr_field.index("usr_id")
+                self.idx_usr_own = arr_field.index("usr_own_table")
+        except:
+            pass
 
     def getClientUserInfo(self, clientUInfos):
+        if os.path.exists(self.str_file) is False:
+            return
         with open(self.str_file, "rb") as ff:
             arr_field = ff.readline().decode('utf-8').split('\t')
             for rr in ff.readlines():
@@ -125,6 +130,8 @@ class AnalyzeHelper(object):
                 clientUInfos[cid] = clientUInfo
 
     def getAppUserInfo(self, appUInfos):
+        if os.path.exists(self.str_file) is False:
+            return
         with open(self.str_file, "rb") as ff:
             arr_field = ff.readline().decode('utf-8').split('\t')
             for rr in ff.readlines():
@@ -156,6 +163,8 @@ class AnalyzeHelper(object):
                 appUInfos[app_id] = appUInfo
 
     def get_tal_coll(self, tal_coll):
+        if os.path.exists(self.str_file) is False:
+            return
         with open(self.str_file, "rb") as ff:
             arr_field = ff.readline().decode('utf-8').split("\t")
             for rr in ff.readlines():
@@ -176,6 +185,8 @@ class AnalyzeHelper(object):
                 tal_coll[vv_table].add_record(vv_peer, vv_path, vv_usr, vv_usr_own, vv_ip)
 
     def getUpAndPeerColl(self, up_coll, peer_map):
+        if os.path.exists(self.str_file) is False:
+            return
         with open(self.str_file, "rb") as ff:
             arr_field = ff.readline().decode('utf-8').split("\t")
             for rr in ff.readlines():
@@ -238,6 +249,12 @@ def outputClientUsrInfoRes(fileName, clientUsrInfos):
         for usr in clientUsrInfos:
             ff.write("%s\t%d\t%d\t%d\n"%(usr, clientUsrInfos[usr].getCntUsed(),\
                                          clientUsrInfos[usr].getCntTb(), clientUsrInfos[usr].getCntApp()))
+
+def outputWebUsr(fileName, peer_map):
+    with open(fileName, "w") as ff:
+        ff.write("apf_addr\n")
+        for wusr in peer_map:
+            ff.write("%s\n"%wusr)
 
 def outputAppUsrInfoRes(fileName, appUsrInfos):
     with open(fileName, "w") as ff:

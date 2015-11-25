@@ -2,9 +2,12 @@
 import sys, os, time, datetime
 import subprocess, collections
 from analyze_helper import *
+from upload_Analyze import upload_statistics
 
 accu_num = 1
 accu_date = datetime.date.today() - datetime.timedelta(1)
+up_date_from = datetime.date(2015, 11, 9)
+pv_date_from = datetime.date(2015, 11, 12)
 
 for argx in sys.argv:
     fmt = dateFmt(argx)
@@ -33,24 +36,29 @@ clientUserInfos = collections.defaultdict(lambda : ClientUserInfo())
 appUserInfos = collections.defaultdict(lambda : AppUserInfo())
 
 for dd in range(accu_num-1):
-    analyzeHelpers = AnalyzeHelper(date_from+datetime.timedelta(days=dd))
-    analyzeHelpers.get_tal_coll(total_tal_coll)
-    analyzeHelpers.getUpAndPeerColl(formerly_up_coll, formerly_peer_map)
-    analyzeHelpers.getClientUserInfo(clientUserInfos)
-    analyzeHelpers.getAppUserInfo(appUserInfos)
+    tmpDate = date_from+datetime.timedelta(days=dd)
+    analyzeHelpers = AnalyzeHelper(tmpDate)
+    if tmpDate >= up_date_from:
+        analyzeHelpers.get_tal_coll(total_tal_coll)
+        analyzeHelpers.getUpAndPeerColl(formerly_up_coll, formerly_peer_map)
+    if tmpDate >= pv_date_from:
+        analyzeHelpers.getClientUserInfo(clientUserInfos)
+        analyzeHelpers.getAppUserInfo(appUserInfos)
 
 today_tal_coll = {}
 analyzeHelpers = AnalyzeHelper(date_to)
-analyzeHelpers.get_tal_coll(today_tal_coll)
-analyzeHelpers.get_tal_coll(total_tal_coll)
-analyzeHelpers.getUpAndPeerColl(today_up_coll, today_peer_map)
-analyzeHelpers.getClientUserInfo(clientUserInfos)
-analyzeHelpers.getAppUserInfo(appUserInfos)
+if date_to >= up_date_from:
+    analyzeHelpers.get_tal_coll(today_tal_coll)
+    analyzeHelpers.get_tal_coll(total_tal_coll)
+    analyzeHelpers.getUpAndPeerColl(today_up_coll, today_peer_map)
 
 todayClientUsrInfo = collections.defaultdict(lambda : ClientUserInfo)
 todayAppUsrInfo = collections.defaultdict(lambda : AppUserInfo)
-analyzeHelpers.getClientUserInfo(todayClientUsrInfo)
-analyzeHelpers.getAppUserInfo(todayAppUsrInfo)
+if date_to >= pv_date_from:
+    analyzeHelpers.getClientUserInfo(clientUserInfos)
+    analyzeHelpers.getAppUserInfo(appUserInfos)
+    analyzeHelpers.getClientUserInfo(todayClientUsrInfo)
+    analyzeHelpers.getAppUserInfo(todayAppUsrInfo)
 
 str_from = str(date_from)
 str_to = str(date_to)
@@ -63,6 +71,8 @@ formerly_usr_coll = collections.defaultdict(lambda:0)
 getUsrColl(formerly_up_coll, formerly_peer_map, formerly_usr_coll)
 today_usr_coll = collections.defaultdict(lambda:0)
 getUsrColl(today_up_coll, today_peer_map, today_usr_coll)
+total_peer_map = formerly_peer_map.copy()
+total_peer_map.update(today_peer_map)
 
 total_usr_coll = formerly_usr_coll.copy()
 newUserInfo = UserInfo()
@@ -83,6 +93,8 @@ str_file = "up_%s_%s.txt"%(str_from, str_to)
 if (accu_num == 1):
     str_file = "up_%s.txt"%(str_from)
 outputUpAnalyzeRes(str_file, total_usr_coll)
+if accu_num != 1:
+    outputUpAnalyzeRes("up_%s.txt"%(str_to), today_usr_coll)
 
 if len(clientUserInfos):
     outputClientUsrInfoRes("cusr_%s_%s.txt"%(str_from, str_to), clientUserInfos)
@@ -92,6 +104,10 @@ if len(appUserInfos):
     outputAppUsrInfoRes("app_%s_%s.txt"%(str_from, str_to), appUserInfos)
 if len(todayAppUsrInfo):
     outputAppUsrInfoRes("app_%s.txt"%(str_to), todayAppUsrInfo)
+if len(total_peer_map):
+    outputWebUsr("wusr_%s_%s.txt"%(str_from, str_to), total_peer_map)
+if len(today_peer_map):
+    outputWebUsr("wusr_%s.txt"%(str_to), today_peer_map)
 
 nNewTable = 0
 nTotalVisit = 0
@@ -119,3 +135,5 @@ print("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t" \
       %(todayUserInfo.get_usercnt(), newUserInfo.get_usercnt(), totalUserInfo.get_usercnt(),\
     todayUserInfo.get_clientusercnt(), newUserInfo.get_clientusercnt(), todayUserInfo.get_clientusercnt(),\
     nLargeThan20, nLargeThan50NewUsr, nLargeThan50In7Days, len(today_tal_coll), nNewTable, nTotalVisit))
+
+upload_statistics(str_from, str_to)
