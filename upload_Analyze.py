@@ -1,4 +1,5 @@
-import sys, os, json, hashlib
+import sys, os, datetime, json, hashlib
+from analyze_helper import dateFmt
 from http.client import HTTPConnection
 
 class TotalResult(object):
@@ -123,5 +124,27 @@ def upload_statistics(str_from, str_to):
     httpClient.request("POST", "/table/push", params, headers)
     r1 = httpClient.getresponse()
     print(r1.status, r1.read().decode("utf-8"))
+
+if __name__ == "__main__":
+    accu_num = 1
+    accu_date = datetime.date.today() - datetime.timedelta(1)
+
+    for argx in sys.argv:
+        fmt = dateFmt(argx)
+        if (argx.isdigit()):
+            accu_num = int(argx)
+        elif len(fmt):
+            accu_date = datetime.datetime.strptime(argx, fmt).date()
+
+    if (accu_date >= datetime.date.today()):
+        print("there is no log for %s" %(str(accu_date)))
+        sys.exit()
+
+    if (accu_num > 30 or accu_num <= 0):
+        print("%d is too big or too small"%(accu_num))
+        sys.exit()
+
+    date_from = accu_date - datetime.timedelta(days=accu_num-1)
+    upload_statistics(str(date_from), str(accu_date))
 #http://apf.wps.cn/form/hkoqEN87Fbex3FFGf76N/a.htm
 #5656b1057be48270c9759add

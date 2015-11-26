@@ -103,5 +103,3 @@ if len(total_peer_map):
     outputWebUsr("res/wusr_%s_%s.txt"%(str_from, str_to), total_peer_map)
 if len(today_peer_map):
     outputWebUsr("res/wusr_%s.txt"%(str_to), today_peer_map)
-
-upload_statistics(str_from, str_to)
