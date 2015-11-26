@@ -78,19 +78,11 @@ total_peer_map = formerly_peer_map.copy()
 total_peer_map.update(today_peer_map)
 
 total_usr_coll = formerly_usr_coll.copy()
-newUserInfo = UserInfo()
-todayUserInfo = UserInfo()
 for uu in today_usr_coll:
     if uu in total_usr_coll:
         total_usr_coll[uu] = total_usr_coll[uu] + today_usr_coll[uu]
     else:
         total_usr_coll[uu] = today_usr_coll[uu]
-        newUserInfo.add_user(uu)
-    todayUserInfo.add_user(uu)
-
-totalUserInfo = UserInfo()
-for uu in total_usr_coll:
-    totalUserInfo.add_user(uu)
 
 str_file = "res/up_%s_%s.txt"%(str_from, str_to)
 if (accu_num == 1):
@@ -111,32 +103,5 @@ if len(total_peer_map):
     outputWebUsr("res/wusr_%s_%s.txt"%(str_from, str_to), total_peer_map)
 if len(today_peer_map):
     outputWebUsr("res/wusr_%s.txt"%(str_to), today_peer_map)
-
-nNewTable = 0
-nTotalVisit = 0
-for (key,val) in today_tal_coll.items():
-    if val.is_new:
-        nNewTable += 1
-    nTotalVisit += val.cnt_visit
-
-nLargeThan20 = 0
-for uu in today_usr_coll:
-    if today_usr_coll[uu] > 20:
-        nLargeThan20 += 1
-
-nLargeThan50NewUsr = 0
-for uu in newUserInfo.get_users():
-    if today_usr_coll[uu] > 50:
-        nLargeThan50NewUsr += 1
-
-nLargeThan50In7Days = 0
-for uu in today_usr_coll:
-    if total_usr_coll[uu] > 50:
-        nLargeThan50In7Days += 1
-
-print("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t" \
-      %(todayUserInfo.get_usercnt(), newUserInfo.get_usercnt(), totalUserInfo.get_usercnt(),\
-    todayUserInfo.get_clientusercnt(), newUserInfo.get_clientusercnt(), todayUserInfo.get_clientusercnt(),\
-    nLargeThan20, nLargeThan50NewUsr, nLargeThan50In7Days, len(today_tal_coll), nNewTable, nTotalVisit))
 
 upload_statistics(str_from, str_to)
