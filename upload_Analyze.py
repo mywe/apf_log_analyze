@@ -78,7 +78,7 @@ class TotalResult(object):
 
     def getResJson(self):
         res = dict()
-        res["table_id"] = "565675087be48270cb759ae9"
+        res["table_id"] = "5656b1057be48270c9759add"
         data = dict()
         ymd = self.str_to.split('-')
         data["f101"] = {"Y":int(ymd[0]), "M":int(ymd[1]), "D":int(ymd[2])}
@@ -117,11 +117,11 @@ def upload_statistics(str_from, str_to):
     md5.update(params.encode('utf-8'))
     headers = {"Host":"apf.wps.cn","Content-type":"application/json",\
                "Content-Length":len(params),"X-Content-MD5":md5.hexdigest(),\
-               "app_id":"ABVkEKbi4GiYScTPyH6m"}
+               "app_id":"hkoqEN87Fbex3FFGf76N"}
 
     httpClient = HTTPConnection("apf.wps.cn", 80, timeout=30)
     httpClient.request("POST", "/table/push", params, headers)
     r1 = httpClient.getresponse()
-    print(r1.status, r1.read())
-
-#{"table_id":"565565457be48270c8759ad7","data":[{"f101":{"Y":1900,"M":1,"D":1,"h":0,"m":0,"ms":0},"f102":1,"f103":1,"f104":1,"f105":1,"f106":1,"f107":1,"f108":1,"f109":1,"f110":1,"f111":1}]}
+    print(r1.status, r1.read().decode("utf-8"))
+#http://apf.wps.cn/form/hkoqEN87Fbex3FFGf76N/a.htm
+#5656b1057be48270c9759add
