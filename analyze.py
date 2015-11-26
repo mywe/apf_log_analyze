@@ -60,11 +60,14 @@ if date_to >= pv_date_from:
     analyzeHelpers.getClientUserInfo(todayClientUsrInfo)
     analyzeHelpers.getAppUserInfo(todayAppUsrInfo)
 
+if os.path.exists('res') is False:
+    os.mkdir('res')
+
 str_from = str(date_from)
 str_to = str(date_to)
-str_file = "table_%s_%s.txt"%(str_from, str_to)
+str_file = "res/table_%s_%s.txt"%(str_from, str_to)
 if (accu_num == 1):
-    str_file = "table_%s.txt"%(str_from)
+    str_file = "res/table_%s.txt"%(str_from)
 outputTbAnalyzeRes(str_file, total_tal_coll)
 
 formerly_usr_coll = collections.defaultdict(lambda:0)
@@ -89,25 +92,25 @@ totalUserInfo = UserInfo()
 for uu in total_usr_coll:
     totalUserInfo.add_user(uu)
 
-str_file = "up_%s_%s.txt"%(str_from, str_to)
+str_file = "res/up_%s_%s.txt"%(str_from, str_to)
 if (accu_num == 1):
-    str_file = "up_%s.txt"%(str_from)
+    str_file = "res/up_%s.txt"%(str_from)
 outputUpAnalyzeRes(str_file, total_usr_coll)
 if accu_num != 1:
-    outputUpAnalyzeRes("up_%s.txt"%(str_to), today_usr_coll)
+    outputUpAnalyzeRes("res/up_%s.txt"%(str_to), today_usr_coll)
 
 if len(clientUserInfos):
-    outputClientUsrInfoRes("cusr_%s_%s.txt"%(str_from, str_to), clientUserInfos)
+    outputClientUsrInfoRes("res/cusr_%s_%s.txt"%(str_from, str_to), clientUserInfos)
 if len(todayClientUsrInfo):
-    outputClientUsrInfoRes("cusr_%s.txt"%(str_to), todayClientUsrInfo)
+    outputClientUsrInfoRes("res/cusr_%s.txt"%(str_to), todayClientUsrInfo)
 if len(appUserInfos):
-    outputAppUsrInfoRes("app_%s_%s.txt"%(str_from, str_to), appUserInfos)
+    outputAppUsrInfoRes("res/app_%s_%s.txt"%(str_from, str_to), appUserInfos)
 if len(todayAppUsrInfo):
-    outputAppUsrInfoRes("app_%s.txt"%(str_to), todayAppUsrInfo)
+    outputAppUsrInfoRes("res/app_%s.txt"%(str_to), todayAppUsrInfo)
 if len(total_peer_map):
-    outputWebUsr("wusr_%s_%s.txt"%(str_from, str_to), total_peer_map)
+    outputWebUsr("res/wusr_%s_%s.txt"%(str_from, str_to), total_peer_map)
 if len(today_peer_map):
-    outputWebUsr("wusr_%s.txt"%(str_to), today_peer_map)
+    outputWebUsr("res/wusr_%s.txt"%(str_to), today_peer_map)
 
 nNewTable = 0
 nTotalVisit = 0
