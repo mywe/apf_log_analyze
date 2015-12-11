@@ -83,6 +83,15 @@ class AnalyzeHelper(object):
     ignore_path = ['/logout', '/usr', '/oauth2']
 
     def __init__(self, date):
+        self.idx_apf_addr = -1
+        self.idx_table_id = -1
+        self.idx_app_id = -1
+        self.idx_path = -1
+        self.idx_ip = -1
+        self.idx_user = -1
+        self.idx_usr_own = -1
+        self.idx_version = -1
+
         self.str_file = str(date)
         try:
             with open(self.str_file, "rb") as ff:
@@ -94,11 +103,14 @@ class AnalyzeHelper(object):
                 self.idx_ip = arr_field.index("ip")
                 self.idx_user = arr_field.index("usr_id")
                 self.idx_usr_own = arr_field.index("usr_own_table")
+                self.idx_version = arr_field.index("apf_build_version")
         except:
             pass
 
     def getClientUserInfo(self, clientUInfos):
         if os.path.exists(self.str_file) is False:
+            return
+        if self.idx_version == -1:
             return
         with open(self.str_file, "rb") as ff:
             arr_field = ff.readline().decode('utf-8').split('\t')
@@ -109,8 +121,8 @@ class AnalyzeHelper(object):
                 if arr[self.idx_ip].startswith(tuple(self.arr_self_ip)) or arr[self.idx_ip].endswith(
                         tuple(self.arr_self_ip)):
                     continue
-#                if arr[self.idx_path].startswith(tuple(self.ignore_path)):
-#                    continue
+                if len(arr[self.idx_version]) == 0:
+                    continue
                 cid = arr[self.idx_apf_addr]
                 clientUInfo = None
                 if cid in clientUInfos:
@@ -137,6 +149,9 @@ class AnalyzeHelper(object):
             for rr in ff.readlines():
                 arr = rr.decode('utf-8').split('\t')
                 if arr[self.idx_apf_addr].endswith(('.C')):
+                    continue
+                if arr[self.idx_apf_addr].endswith(('.W'))\
+                        and (self.idx_version == -1 or len(arr[self.idx_version]) == 0):
                     continue
                 if arr[self.idx_ip].startswith(tuple(self.arr_self_ip)) or arr[self.idx_ip].endswith(
                         tuple(self.arr_self_ip)):
@@ -176,6 +191,9 @@ class AnalyzeHelper(object):
                 vv_usr_own = arr[self.idx_usr_own]
                 vv_ip = arr[self.idx_ip]
 
+                if arr[self.idx_apf_addr].endswith(('.C', '.W'))\
+                        and (self.idx_version == -1 or len(arr[self.idx_version]) == 0):
+                    continue
                 if (len(vv_table) == 0 or vv_ip in self.arr_self_ip):
                     continue
 
@@ -187,10 +205,14 @@ class AnalyzeHelper(object):
     def getUpAndPeerColl(self, up_coll, peer_map):
         if os.path.exists(self.str_file) is False:
             return
+        if self.idx_version == -1:
+            return
         with open(self.str_file, "rb") as ff:
             arr_field = ff.readline().decode('utf-8').split("\t")
             for rr in ff.readlines():
                 arr = rr.decode('utf-8').split("\t")
+                if len(arr[self.idx_version]) == 0:
+                    continue;
                 up = (arr[self.idx_user], arr[self.idx_apf_addr])
                 if (arr[self.idx_ip].startswith(tuple(self.arr_self_ip)) or arr[self.idx_ip].endswith(
                         tuple(self.arr_self_ip))):
