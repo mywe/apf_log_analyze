@@ -150,7 +150,8 @@ class AnalyzeHelper(object):
                 arr = rr.decode('utf-8').split('\t')
                 if arr[self.idx_apf_addr].endswith(('.C')):
                     continue
-                if arr[self.idx_apf_addr].endswith(('.W'))\
+                if arr[self.idx_path].startswith('/form/') == False\
+						and arr[self.idx_apf_addr].endswith(('.W'))\
                         and (self.idx_version == -1 or len(arr[self.idx_version]) == 0):
                     continue
                 if arr[self.idx_ip].startswith(tuple(self.arr_self_ip)) or arr[self.idx_ip].endswith(
