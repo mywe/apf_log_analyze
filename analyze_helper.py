@@ -218,11 +218,13 @@ class AnalyzeHelper(object):
                 if (arr[self.idx_ip].startswith(tuple(self.arr_self_ip)) or arr[self.idx_ip].endswith(
                         tuple(self.arr_self_ip))):
                     continue
-                if (len(up[1]) == 0):
+                if (len(up[0]) == 0 && len(up[1]) == 0 || len(up[1]) == 0):
                     continue
                 up_coll[up] = up_coll[up] + 1
                 if (len(up[0]) != 0):
                     peer_map[up[1]].add(up[0])
+				else:
+					peer_map[up[1]]
 
 def dateFmt(arg):
     fmts = ['%Y/%m/%d', '%Y-%m-%d', '%Y%m%d']
